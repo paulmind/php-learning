@@ -5,6 +5,7 @@
  * Классы определяют объекты!
  * Класс - это шаблон для создания объектов
  * Объект - это данные, которые структурируются в соответсвии с шаблоном, определенным в классе
+ * Класс также можно считать новым типом
  *
  */
 class Monster {
@@ -13,6 +14,34 @@ class Monster {
 	protected $aggressive; // статус (арессивный, добрый) //
 	public $damage;
 	public $name;
+//	Конструктор вызывается при создании объекта
+//	PHPDoc comments
+	/**
+	 * @param null $name
+	 * @param null $damage
+	 * @param null $size
+	 * @param array() $arr
+	 * @type string $name
+	 * @type int $damage
+	 * @type int $size
+	 * @type array $arr
+	 */
+	function __construct($name=null, $damage=null, $size=null,array /*уточнение типов*/ $arr=array()){
+//		уточнение типов возможно только для массивов и объектов
+		$this->name=$name;
+		$this->damage=$damage;
+		$this->size=$size;
+		$this->getInfo();
+	}
+
+//	Методы [methods] - это спец. функции, которые объявляются внутри класса
+	function getInfo() {
+		echo <<<EOT
+size: {$this->size}
+damage: {$this->damage}
+name: {$this->name}\n
+EOT;
+	}
 }
 
 $monster_zombie = new Monster();# объект zombie типа monster (также говорят, что объект - это экземпляр класса)
@@ -39,4 +68,14 @@ $monster_zombie->name='zombie_warlord';
 $monster_alien->size=5;
 $monster_alien->damage=0.3;
 $monster_alien->name='headcrab';
-var_dump($monster_zombie, $monster_alien);
+$monster_alien->getInfo();
+$monster_zombie->getInfo();
+//var_dump($monster_zombie, $monster_alien);
+/**
+ * Определив конструктор и добавив в тело метод getInfo мы упростили
+ * работу с классом и обеспечили инициализацию свойств объекта
+ */
+$name='harpy';
+$size='6';
+$arr='type_array';
+$monster_predator = new Monster((string) $name, 0.5,(int) $size,(array) $arr);# приведение типов
