@@ -17,26 +17,22 @@ class Monster {
 //	Конструктор вызывается при создании объекта
 //	PHPDoc comments
 	/**
-	 * @param null $name
-	 * @param null $damage
-	 * @param null $size
-	 * @param array() $arr
-	 * @type string $name
-	 * @type int $damage
-	 * @type int $size
-	 * @type array $arr
+	 * @param string $name
+	 * @param float $damage
+	 * @param int $size
+	 * @param array $arr
 	 */
 	function __construct($name=null, $damage=null, $size=null,array /*уточнение типов*/ $arr=array()){
 //		уточнение типов возможно только для массивов и объектов
 		$this->name=$name;
 		$this->damage=$damage;
 		$this->size=$size;
-		$this->getInfo();
 	}
 
 //	Методы [methods] - это спец. функции, которые объявляются внутри класса
 	function getInfo() {
 		echo <<<EOT
+\n
 size: {$this->size}
 damage: {$this->damage}
 name: {$this->name}\n
@@ -174,7 +170,9 @@ class MonsterDragon {
 
 class MonsterInfo {
 	function show($monster){
-		if(!($monster instanceof MonsterZombie) && !($monster instanceof MonsterDragon))
+		if(!($monster instanceof Monster)
+			&& !($monster instanceof MonsterZombie)
+			&& !($monster instanceof MonsterDragon))
 			die("\nПередан неверный тип данных");
 //		Вместо оператора instanceof будет true, если объект в операнде слева относится к типу операнда справа.
 //		ВАЖНО!!!
@@ -199,5 +197,121 @@ $monster_dragon->getRank();
 /**
  * Наследование (inheritance) - это механизм, который позволяет
  * из базового класса получить один или несколько дочерних классов
+ * Чтобы создать дочерний класс, необходимо использовать ключевое слово extends
+ * Дочерние классы наследуют доступ ко всем методам типа public и protected (но не private) родительского класса
  *
+ * В базовом классе недопустимо предоставлять доступ к тем данным (свойствам),
+ * которыми должен оперировать дочерний класс.
  */
+class MonsterVampire extends Monster {
+/**
+ * Переопределим свойство aggressive родительского класса,
+ * изменив его область видимости с protected на public,
+ * иначе, передав его в метод show класса MonsterInfo,
+ * получим ошибку уровня fatal error (Cannot access protected property MonsterVampire::$aggressive)
+ */
+	public $aggressive=true;
+/**
+ * Чтобы добавить собственные свойства дочернему классу,
+ * необходимо вызвать конструктор своего родительского класса,
+ * прежде чем определять собственные свойства.
+ * Таким образом, базовый класс знает только о собственных данных.
+ */
+	public $invisibility=true;
+	public $flying=true;
+
+	/**
+	 * @param string $name
+	 * @param float $damage
+	 * @param int $size
+	 * @param bool|string $invisibility
+	 * @param bool|string $flying
+	 */
+	function __construct($name, $damage, $size, $invisibility, $flying){
+		/**
+		 * При определении конструктора в дочернем классе вы берете на себя ответственность
+		 * за передачу требуемых аргументов родительскому классу.
+		 *
+		 * Чтобы обратиться к методу в контексте класса, а не объекта,
+		 * следует использовать символы "::", а не "->".
+		 */
+		parent::__construct($name, $damage, $size);
+		$this->invisibility=$invisibility;
+		$this->flying=$flying;
+	}
+
+	function getInfo(){
+		/**
+		 * Если мы хотим расширить функции родителя, а не удалить их,
+		 * тогда необходимо вызвать метод родительского класса
+		 * в контексте текущего объекта.
+		 */
+		parent::getInfo();
+		echo <<<EOT
+invisibility: {$this->invisibility}
+flying: {$this->flying}\n
+EOT;
+	}
+
+}
+$monster_vampire = new MonsterVampire('dracula', 0.7, 4, 'yes', 'no');
+$info->show($monster_vampire);
+$monster_vampire->getInfo();
+
+/**
+ * GETTER & SETTER
+ * Даже если в клиентской программе нужно будет работать со значениями, хранящимися в экземпляре класса,
+ * как правило, стоит запретить прямой доступ к свойствам этого объекта.
+ * Вместо этого создайте методы, которые возвращают или устанавливают нужные значения.
+ * Такие методы называют методами доступа (accessor methods) или получателями (getter) и установщиками (setter)
+ */
+class MyClassPrivate {
+	private $firstField;
+	private $secondField;
+
+	public function getFirstField() {
+		return $this->firstField;
+	}
+	public function setFirstField($val) {
+		$this->firstField = $val;
+	}
+	public function getSecondField() {
+		return $this->secondField;
+	}
+	public function setSecondField($val) {
+		$this->secondField = $val;
+	}
+}
+//OR
+class MyClassPublic {
+	public $firstField;
+	public $secondField;
+}
+//OR
+/**
+ * Класс MyClassMagic использует для доступа к закрытым (private) свойствам
+ * магические методы __get и __set
+ */
+class MyClassMagic {
+	private $firstField;
+	private $secondField;
+
+	public function __get($property) {
+		if (property_exists($this, $property)) {
+			return $this->$property;
+		}
+		return null;
+	}
+
+	public function __set($property, $value) {
+		if (property_exists($this, $property)) {
+			$this->$property = $value;
+		}
+		return $this;
+	}
+
+}
+
+$obj = new MyClassMagic();
+$obj->firstField = 'test';
+echo "\n{$obj->firstField}\n";
