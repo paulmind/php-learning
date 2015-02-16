@@ -1,4 +1,10 @@
 <?php
+/*
+<?php ?> // standard tags
+<? ?> // short tags, need short_open_tag enabled in php.ini
+<% %> // asp tags, need asp_tags enabled in php.ini
+<script language="php"> </script> // case insensitive
+*/
 /**
  * Классы и объекты
  *

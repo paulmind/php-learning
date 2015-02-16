@@ -1,4 +1,5 @@
 <?php
+require_once('./objects.php');
 /**
  * Static methods
  * Если классы это шаблоны, с помощью которых создаются объекты,
@@ -38,3 +39,46 @@ StaticExample::staticMethod();
 $class_name::staticMethod();
 
 print StaticExample::AVAILABLE;
+
+/**
+ * Class MonsterWriter
+ * Абстрактный класс - это класс, в котором определяется интерфейс для любого дочернего класса.
+ * Нельзя создать экземпляр абстрактного класса.
+ */
+abstract class MonsterWriter {
+	/**
+	 * Закрыв доступ к свойству monsters, мы запретили внешние операции клиентского кода такие, как
+	 * добавить объект неправильного типа, затереть весь массив или заменить его значением элементарного типа.
+	 * Теперь добавлять монстров можно только через метод-установщик(setter) addMonster.
+	 */
+	protected $monsters = array();
+
+	public function addMonster(Monster $monster){
+		$this->monsters[] = $monster;
+	}
+	/**
+	 * Создавая абстрактный метод, мы гарантируем, что его реализация будет во всех дочерних классах.
+	 */
+	abstract public function write($test=null, array $arr=array());
+}
+
+class XmlMonsterWriter extends MonsterWriter {
+	/**
+	 * Уровень доступа в реализующем методе должен быть не строже, чем в абстрактном методе.
+	 * Количество и уточнение типов аргументов в реализующем методе должно соответствовать абстрактному методу.
+	 */
+	public function write($test=null, array $arr=array()){
+		$str = "\n\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+		$str .= "<monsters>\n";
+		foreach($this->monsters as $monster){
+			$str .= "\t<monster name=\"{$monster->name}\" damage=\"{$monster->damage}\" size=\"{$monster->size}\"/>\n";
+		}
+		$str .= "</monster>\n";
+		print $str;
+	}
+}
+$monster = new XmlMonsterWriter();
+$monster->addMonster($monster_vampire);
+$monster_valkyrie = new MonsterVampire('valkyrie', 0.8, 6, 'no', 'yes');
+$monster->addMonster($monster_valkyrie);
+$monster->write();
