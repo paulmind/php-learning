@@ -1,4 +1,5 @@
 <?php
+require_once('./interface.php');
 /*
 <?php ?> // standard tags
 <? ?> // short tags, need short_open_tag enabled in php.ini
@@ -209,7 +210,7 @@ $monster_dragon->getRank();
  * В базовом классе недопустимо предоставлять доступ к тем данным (свойствам),
  * которыми должен оперировать дочерний класс.
  */
-class MonsterVampire extends Monster {
+class MonsterVampire extends Monster implements Flyable {
 /**
  * Переопределим свойство aggressive родительского класса,
  * изменив его область видимости с protected на public,
@@ -257,6 +258,10 @@ class MonsterVampire extends Monster {
 invisibility: {$this->invisibility}
 flying: {$this->flying}\n
 EOT;
+	}
+
+	function motion($type, $speed, $path){
+		echo "\nMonster {$this->name} is flying ---> (params: speed->$speed, path->$path)";
 	}
 
 }

@@ -73,7 +73,7 @@ class XmlMonsterWriter extends MonsterWriter {
 		foreach($this->monsters as $monster){
 			$str .= "\t<monster name=\"{$monster->name}\" damage=\"{$monster->damage}\" size=\"{$monster->size}\"/>\n";
 		}
-		$str .= "</monster>\n";
+		$str .= "</monsters>\n";
 		print $str;
 	}
 }
@@ -82,3 +82,27 @@ $monster->addMonster($monster_vampire);
 $monster_valkyrie = new MonsterVampire('valkyrie', 0.8, 6, 'no', 'yes');
 $monster->addMonster($monster_valkyrie);
 $monster->write();
+
+class initAction{
+	/**
+	 * Благодаря уточнению типа объекта, только летающие монстры могут летать,
+	 * а класс MonsterVampire, расширяющий тип интерфейса Flyable гарантирует реализацию метода motion.
+	 * @param Flyable
+	 */
+	function setFly(Flyable $obj){
+		$obj->motion('dynamic', 100, 'circle');
+	}
+}
+
+$initAction = new initAction();
+$initAction->setFly($monster_valkyrie);
+//$initAction->setFly($monster_zombie);
+
+//и еще пример
+interface Car { function go(); }
+class Porsche implements Car { function go() {} }
+function drive(Car $car) {}
+$porsche = new Porsche();
+if($porsche instanceof Car)
+	echo "\nThis is a car";
+drive($porsche);
