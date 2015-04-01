@@ -106,3 +106,65 @@ $porsche = new Porsche();
 if($porsche instanceof Car)
 	echo "\nThis is a car";
 drive($porsche);
+
+/**
+ * php 5.3.0 =>
+ * late static binding (LSB)
+ * Позднее статическое связывание позволяет объектам все также наследовать методы у родительских классов,
+ * но помимо этого дает возможность унаследованным методам иметь доступ к статическим константам,
+ * методам и свойствам класса потомка, а не только родительского класса.
+ */
+abstract class Fruit{
+//	const TABLE_NAME = 'tbl_fruit';
+
+	abstract public static function getName();
+
+	function __construct(){
+		/**
+		 * Внутренне, основное отличие (и, собственно, причина почему связывание назвали поздним) между этими двумя способами доступа (self vs static),
+		 * в том, что PHP определят значение для self::TABLE_NAME во время «компиляции» (когда симовлы PHP преобразуются в машинный код, который будет обрабатываться движком Zend),
+		 * а для static::TABLE_NAME значение будет определено в момент запуска (в тот момент, когда машинный код будет выполнятся в движке Zend).
+		 */
+		echo "\nconstructor`s invoked, const declare->".static::TABLE_NAME;// self::TABLE_NAME
+	}
+
+	public function makeJuice(){
+		$name=static::getName();
+		return "juice=$name+blender";
+	}
+
+	public static function create(){
+		//return new self();
+		return new static();// Здесь действует позднее статическое связывание
+	}
+}
+class Apple extends Fruit{
+	const TABLE_NAME = 'tbl_apple';
+	public static function getName(){
+		return __CLASS__;
+	}
+}
+class Pear extends Fruit{
+	const TABLE_NAME = 'tbl_pear';
+	public static function getName(){
+		return __CLASS__;
+	}
+}
+//$a = new Apple();
+$a=Apple::create();
+$b=Pear::create();
+echo "\n{$a->makeJuice()},\n{$b->makeJuice()}\n";
+
+/**
+ * Class Model
+ * пример доступа к статическому свойству класса потомка
+ */
+class Model{
+	public static function find(){
+		echo static::$name;
+	}
+}
+class Product extends Model{
+	protected static $name = 'Product';
+}
+Product::find();
